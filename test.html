@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gmap Web component</title>
+    <script async src="https://maps.googleapis.com/maps/api/js?key=YOOUR_API_KEY&language=it&loading=async"></script>
+    <script src="https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js"></script>
+
+    <script type="module" src="/src/components/wc-gmap.ts"></script>
+    <script type="module" src="/src/components/wc-advmarker.ts"></script>
+    <script type="module" src="/src/components/wc-infowindow.ts"></script>
+    <script type="module" src="/src/components/wc-markerclusterer.ts"></script>
+  </head>
+  <body>
+    <wc-gmap 
+      id="mappa_test"
+      lat="45.5925512"
+      lng="12.5566951"
+      zoom="4"
+      stylemapid="82dd7744e7dc572b"
+      autopanfit
+      pinCustom
+      mapHeight="98vh"
+      >
+      <wc-advmarker lat="45.5925512" lng="12.5566951" pinCustom pinScale="1.4">
+        <wc-infowindow><p style="color:red">test</p></wc-infowindow>
+      </wc-advmarker>
+      <wc-advmarker lat="43.5925512" lng="11.5566951">
+        <wc-infowindow><p>test 2</p></wc-infowindow>
+      </wc-advmarker>
+      <wc-advmarker lat="44.5525512" lng="10.5566951">
+        <wc-infowindow><p>test 2</p></wc-infowindow>
+      </wc-advmarker>
+      <wc-advmarker lat="45.425512" lng="12.5566951">
+        <wc-infowindow><p style="color:red">test</p></wc-infowindow>
+      </wc-advmarker>
+      <wc-advmarker lat="43.125512" lng="11.5566951">
+        <wc-infowindow><p>test 2</p></wc-infowindow>
+      </wc-advmarker>
+      <wc-advmarker lat="44.6525512" lng="10.5566951">
+        <wc-infowindow><p>test 2</p></wc-infowindow>
+      </wc-advmarker>
+      <wc-advmarker lat="45.5925512" lng="11.5566951">
+        <wc-infowindow><p style="color:red">test</p></wc-infowindow>
+      </wc-advmarker>
+      <wc-advmarker lat="43.5925512" lng="19.5566951">
+        <wc-infowindow><p>test 2</p></wc-infowindow>
+      </wc-advmarker>
+      <wc-advmarker lat="44.5925512" lng="17.5566951">
+        <wc-infowindow><p>test 2</p></wc-infowindow>
+      </wc-advmarker>
+      <wc-advmarker lat="48.5925512" lng="19.5566951">
+        <wc-infowindow><p>test 2</p></wc-infowindow>
+      </wc-advmarker>
+      <wc-advmarker lat="55.5925512" lng="17.5566951">
+        <wc-infowindow><p>test 2</p></wc-infowindow>
+      </wc-advmarker>
+      <wc-markerclusterer pinCustom pinScale="1.4" pinBorderColor="#FF5500"></wc-markerclusterer>
+    </wc-gmap>
+  </body>
+</html>
