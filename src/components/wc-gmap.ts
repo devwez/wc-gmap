@@ -166,7 +166,7 @@ export class WcGmap extends LitElement {
             pin.element.addEventListener('animationend', () => { pin.element.classList.remove('drop'); pin.element.style.opacity = '1'; });
             
             setTimeout(() => { this._createMarker(marker, pin); }, delayMarker);
-            delayMarker += 100;
+            delayMarker += this.markerDelay;
 
             var mLatLng = new google.maps.LatLng(marker.lat, marker.lng);
             if (this.autopanfit) this.latlngbounds?.extend(mLatLng);
