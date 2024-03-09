@@ -65,6 +65,9 @@ export class WcGmap extends LitElement {
     @property({ type: String })
     mapHeight = '100%';
 
+    @property({ type: Number })
+    markerDelay = 100;
+
     map: any = null;
     markerNodes: any = null;
     markers: any = null;
@@ -123,7 +126,7 @@ export class WcGmap extends LitElement {
 
         this.markers = [];
         this.infoW = new InfoWindow();
-        var delayMarker = 100;
+        var delayMarker = this.markerDelay;
         this.markerNodes.forEach((marker: any) => {
             this.PIN_TYPE = this.PIN_TYPE |
                 ((this.pinCustom) ? this.PIN_CUSTOM_WC_GMAP : 0) |
