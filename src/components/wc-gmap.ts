@@ -85,40 +85,53 @@ export class WcGmap extends LitElement {
     styles: string = ``;
 
 
-    protected _loadGoogleApiScript(): void {
-        if (typeof google === 'undefined') {
-            console.log('google api not loaded');
-            setTimeout(() => this._loadGoogleApiScript(), 100);
-            return;
+    protected async _createMarker(marker: any, pin: any): Promise<void> {
+        const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
+        const m = new AdvancedMarkerElement({
+            map: this.map,
+            position: {
+                lat: marker.lat,
+                lng: marker.lng
+            },
+            content: pin.element
+        });
+        if (marker.infoNode) {
+            m.addListener('click', ({ latLng }: { latLng: any }) => {
+                this.infoW.close();
+                this.infoW.setContent(marker.infoHtml);
+                this.infoW.open(this.map, m);
+                this.map.panTo(latLng);
+            });
         }
-        if (this.markerClusterer && typeof markerClusterer === 'undefined') {
-            console.log('markerClusterer not loaded');
-            return;
-        }
-        this.latlngbounds = (this.autopanfit) ? new google.maps.LatLngBounds() : null;
-        this.initmarkerclusterer();
+        this.markers.push(m);
     }
 
-    protected firstUpdated(): void {
-        console.log('first updated');
-        this._loadGoogleApiScript();
+    protected initautopanfit(): void {
+        if (this.autopanfit) {
+            this.map.fitBounds(this.latlngbounds);
+            this.map.panToBounds(this.latlngbounds);
+        }
+    }
+
+    protected initMarkersEnd(): void {
+        this.initautopanfit();
     }
 
     protected async initmarker(): Promise<void> {
         const { InfoWindow } = await google.maps.importLibrary("maps");
-        const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
-        
+        const { PinElement } = await google.maps.importLibrary("marker");
+
         this.markers = [];
         this.infoW = new InfoWindow();
-
+        var delayMarker = 100;
         this.markerNodes.forEach((marker: any) => {
             this.PIN_TYPE = this.PIN_TYPE |
                 ((this.pinCustom) ? this.PIN_CUSTOM_WC_GMAP : 0) |
                 ((marker.pinCustom) ? this.PIN_CUSTOM_WC_ADVMARKER : 0) |
                 ((this.pinHtml) ? this.PIN_HTML_WC_GMAP : 0) |
                 ((marker.pinHtml) ? this.PIN_HTML_WC_ADVMARKER : 0);
-            
-            var pin = null;
+
+            let pin = null;
             switch (this.PIN_TYPE) {
                 case 0:
                     pin = new PinElement();
@@ -145,31 +158,21 @@ export class WcGmap extends LitElement {
                     pin = new PinElement();
                     break;
             }
+            pin.element.classList.add('pin-drop');
+            pin.element.style.opacity = '0';
+            pin.element.addEventListener('animationend', () => { pin.element.classList.remove('drop'); pin.element.style.opacity = '1'; });
+            
+            setTimeout(() => { this._createMarker(marker, pin); }, delayMarker);
+            delayMarker += 100;
 
-            const m = new AdvancedMarkerElement({
-                map: this.map,
-                position: {
-                    lat: marker.lat,
-                    lng: marker.lng
-                },
-                content: pin.element
-            });
-            if (marker.infoNode) {
-                m.addListener('click', ({ latLng }: { latLng: any }) => {
-                    this.infoW.close();
-                    this.infoW.setContent(marker.infoHtml);
-                    this.infoW.open(this.map, m);
-                    this.map.panTo(latLng);
-                });
-            }
-
-            this.markers.push(m);
             var mLatLng = new google.maps.LatLng(marker.lat, marker.lng);
             if (this.autopanfit) this.latlngbounds?.extend(mLatLng);
-
+            
             this.PIN_TYPE = 0;
 
         });
+        setTimeout(() => { this.initmarkerclusterer(); }, delayMarker);
+        this.initMarkersEnd();
     }
 
     protected async initmarkerclusterer(): Promise<void> {
@@ -207,15 +210,19 @@ export class WcGmap extends LitElement {
         }
     }
 
-    protected initautopanfit(): void {
-        if (this.autopanfit) {
-            this.map.fitBounds(this.latlngbounds);
-            this.map.panToBounds(this.latlngbounds);
-        }
-    }
-    
     protected async initMap(): Promise<void> {
+        if (typeof google === 'undefined') {
+            console.log('google api not loaded');
+            setTimeout(() => this.initMap(), 100);
+            return;
+        }
+        if (this.markerClusterer && typeof markerClusterer === 'undefined') {
+            console.log('markerClusterer not loaded');
+            setTimeout(() => this.initMap(), 100);
+            return;
+        }
         this.latlngbounds = (this.autopanfit) ? new google.maps.LatLngBounds() : null;
+        
         const { Map } = await google.maps.importLibrary("maps");
         this.map = new Map(this.shadowRoot?.querySelector('#' + this.id), {
             center: { lat: this.lat, lng: this.lng },
@@ -228,15 +235,10 @@ export class WcGmap extends LitElement {
             streetViewControl: this.streetViewControl,
             overviewMapControl: this.overviewMapControl
         });
-
-        await this.initmarker();
-        this.initautopanfit();
+        google.maps.event.addListenerOnce(this.map, 'idle', () => { this.initmarker(); })
     }
 
-    connectedCallback() {
-        super.connectedCallback();
-        console.log('connect callback');
-        (window as any)[`${this.id}`]['init_map'] = () => this.initMap();
+    protected _appendScripts(): void {
         const sg = document.createElement('script');
         sg.async = true;
         sg.src = `https://maps.googleapis.com/maps/api/js?key=${this.apikey}&language=it&loading=async&callback=window.${this.id}.init_map`;
@@ -244,18 +246,21 @@ export class WcGmap extends LitElement {
         const sgm = document.createElement('script');
         sgm.src = 'https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js';
         document.head.appendChild(sgm);
+    }
+
+    connectedCallback() {
+        super.connectedCallback();
+        (window as any)[`${this.id}`]['init_map'] = () => this.initMap();
+        this._appendScripts();
         this.markerNodes = this.querySelectorAll('wc-advmarker');
         this.markerClustererNode = this.querySelector('wc-markerclusterer');
         if (this.markerClustererNode) this.markerClusterer = true;
         this.pinHtml = this.querySelector('wc-pinhtml');
         const styles = this.querySelector('style');
         this.styles = styles?.innerText || '';
-        console.log(window);
     }
 
-    _closeInfo(): void {
-
-    }
+    _closeInfo(): void {}
 
     render() {
         console.log('render');
