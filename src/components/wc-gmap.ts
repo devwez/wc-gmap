@@ -203,7 +203,6 @@ export class WcGmap extends LitElement {
                 viewportPadding: this.markerClustererNode.viewportPadding
             };
 
-
             this.mc = new markerClusterer.MarkerClusterer({
                 map: this.map,
                 markers: this.markers,
@@ -238,7 +237,9 @@ export class WcGmap extends LitElement {
             streetViewControl: this.streetViewControl,
             overviewMapControl: this.overviewMapControl
         });
-        google.maps.event.addListenerOnce(this.map, 'idle', () => { this.initmarker(); })
+        google.maps.event.addListenerOnce(this.map, 'tilesloaded', () => { 
+            setTimeout(() => this.initmarker(), 300); 
+        });
     }
 
     protected _appendScripts(): void {
@@ -268,9 +269,7 @@ export class WcGmap extends LitElement {
     render() {
         console.log('render');
         return html`
-            <style>
-                ${this.styles}
-            </style>
+            <style>${this.styles}</style>
             <div id="${this.id}" style="height: ${this.mapHeight};"></div>
         `;
     }
