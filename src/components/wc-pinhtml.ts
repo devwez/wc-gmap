@@ -10,12 +10,15 @@ export class WcPinHtml extends LitElement {
     @property({type: String})
     class: string = 'pin-tag';
 
+    @property({type: Boolean})
+    step: boolean = false;
+
     @property({type: String})
     htmlContent: string = '';
 
     connectedCallback() {
         super.connectedCallback();
-        this.htmlContent = this.innerHTML;
+        this.htmlContent = (!this.step) ? this.innerHTML : '';
     }
 }
 

@@ -128,12 +128,7 @@ export class WcGmap extends LitElement {
         this.infoW = new InfoWindow();
         var delayMarker = this.markerDelay;
         this.markerNodes.forEach((marker: any) => {
-            this.PIN_TYPE = this.PIN_TYPE |
-                ((this.pinCustom) ? this.PIN_CUSTOM_WC_GMAP : 0) |
-                ((marker.pinCustom) ? this.PIN_CUSTOM_WC_ADVMARKER : 0) |
-                ((this.pinHtml) ? this.PIN_HTML_WC_GMAP : 0) |
-                ((marker.pinHtml) ? this.PIN_HTML_WC_ADVMARKER : 0);
-
+            this.PIN_TYPE = this.PIN_TYPE | ((this.pinCustom) ? this.PIN_CUSTOM_WC_GMAP : 0) | ((marker.pinCustom) ? this.PIN_CUSTOM_WC_ADVMARKER : 0) | ((this.pinHtml) ? this.PIN_HTML_WC_GMAP : 0) | ((marker.pinHtml) ? this.PIN_HTML_WC_ADVMARKER : 0);
             let pin = null;
             switch (this.PIN_TYPE) {
                 case 0:
@@ -155,6 +150,7 @@ export class WcGmap extends LitElement {
                     var divElement = document.createElement('div');
                     divElement.innerHTML = marker.pinHtml.htmlContent;
                     divElement.className = marker.pinHtml.class;
+
                     pin = { element: divElement };
                     break;
                 default:
@@ -164,13 +160,13 @@ export class WcGmap extends LitElement {
             pin.element.classList.add('pin-drop');
             pin.element.style.opacity = '0';
             pin.element.addEventListener('animationend', () => { pin.element.classList.remove('drop'); pin.element.style.opacity = '1'; });
-            
+
             setTimeout(() => { this._createMarker(marker, pin); }, delayMarker);
             delayMarker += this.markerDelay;
 
             var mLatLng = new google.maps.LatLng(marker.lat, marker.lng);
             if (this.autopanfit) this.latlngbounds?.extend(mLatLng);
-            
+
             this.PIN_TYPE = 0;
 
         });
@@ -224,7 +220,7 @@ export class WcGmap extends LitElement {
             return;
         }
         this.latlngbounds = (this.autopanfit) ? new google.maps.LatLngBounds() : null;
-        
+
         const { Map } = await google.maps.importLibrary("maps");
         this.map = new Map(this.shadowRoot?.querySelector('#' + this.id), {
             center: { lat: this.lat, lng: this.lng },
@@ -237,8 +233,8 @@ export class WcGmap extends LitElement {
             streetViewControl: this.streetViewControl,
             overviewMapControl: this.overviewMapControl
         });
-        google.maps.event.addListenerOnce(this.map, 'tilesloaded', () => { 
-            setTimeout(() => this.initmarker(), 300); 
+        google.maps.event.addListenerOnce(this.map, 'tilesloaded', () => {
+            setTimeout(() => this.initmarker(), 300);
         });
     }
 
@@ -264,10 +260,9 @@ export class WcGmap extends LitElement {
         this.styles = styles?.innerText || '';
     }
 
-    _closeInfo(): void {}
+    _closeInfo(): void { }
 
     render() {
-        console.log('render');
         return html`
             <style>${this.styles}</style>
             <div id="${this.id}" style="height: ${this.mapHeight};"></div>
